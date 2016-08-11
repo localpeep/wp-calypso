@@ -81,7 +81,6 @@ export class FullPostView extends React.Component {
 		if ( post.feed_ID ) {
 			classes[ 'feed-' + post.feed_ID ] = true;
 		}
-
 		/*eslint-disable react/no-danger*/
 		return (
 			<ReaderMain className={ classNames( classes ) }>
