@@ -30,6 +30,30 @@ const debug = debugFactory( 'calypso:popover' );
 const __popovers = new Set();
 
 class Popover extends Component {
+	static propTypes = {
+		autoPosition: PropTypes.bool,
+		className: PropTypes.string,
+		closeOnEsc: PropTypes.bool,
+		id: PropTypes.string,
+		ignoreContext: PropTypes.shape( { getDOMNode: React.PropTypes.function } ),
+		position: PropTypes.string,
+		showDelay: PropTypes.number,
+
+		onClose: PropTypes.func.isRequired,
+		onShow: PropTypes.func,
+	};
+
+	static defaultProps = {
+		autoPosition: true,
+		className: 'popover',
+		closeOnEsc: true,
+		isVisible: false,
+		position: 'top',
+		showDelay: 0,
+
+		onShow: noop,
+	}
+
 	constructor( props ) {
 		super( props );
 
@@ -301,7 +325,11 @@ class Popover extends Component {
 	}
 
 	show() {
-		setTimeout( () => { this.bindClickoutHandler(); }, 10 );
+		// bind clickout-side event every time the component is shown.
+		// HACK: Let's bind once the DOM rederence is injected.
+		setTimeout( () => {
+			this.bindClickoutHandler();
+		}, 10 );
 
 		if ( ! this.props.showDelay ) {
 			this.setState( { show: true } );
@@ -317,6 +345,7 @@ class Popover extends Component {
 	}
 
 	hide() {
+		// unbind clickout-side event every time the component is hidden.
 		this.unbindClickoutHandler();
 		this.setState( { show: false } );
 		this.clearShowTimer();
@@ -341,22 +370,19 @@ class Popover extends Component {
 	}
 
 	render() {
-		const { show } = this.state;
-
-		if ( ! show ) {
+		if ( ! this.state.show ) {
+			this.debug( 'is hidden. return no render' );
 			return null;
 		}
 
-		const { context, className } = this.props;
-
-		if ( ! context ) {
-			this.debug( 'No `context` to tie the Popover' );
+		if ( ! this.props.context ) {
+			this.debug( 'No `context` to tie. return no render' );
 			return null;
 		}
 
 		const classes = classNames(
 			'popover',
-			className,
+			this.props.className,
 			this.state.positionClass
 		);
 
@@ -379,29 +405,5 @@ class Popover extends Component {
 		);
 	}
 }
-
-Popover.propTypes = {
-	autoPosition: PropTypes.bool,
-	className: PropTypes.string,
-	closeOnEsc: PropTypes.bool,
-	id: PropTypes.string,
-	ignoreContext: PropTypes.shape( { getDOMNode: React.PropTypes.function } ),
-	position: PropTypes.string,
-	showDelay: PropTypes.number,
-
-	onClose: PropTypes.func.isRequired,
-	onShow: PropTypes.func,
-};
-
-Popover.defaultProps = {
-	autoPosition: true,
-	className: 'popover',
-	closeOnEsc: true,
-	isVisible: false,
-	position: 'top',
-	showDelay: 0,
-
-	onShow: noop,
-};
 
 export default Popover;
