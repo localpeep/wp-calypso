@@ -18,8 +18,7 @@ function StatsParser() {
 
 function rangeOfPeriod( period, date ) {
 	date = new i18n.moment( date ).locale( 'en' );
-	var periodRange = {
-		period: period,
+	var periodRange = { period: period,
 		startOf: date.clone().startOf( period ),
 		endOf: date.clone().endOf( period )
 	};
@@ -62,11 +61,12 @@ StatsParser.prototype.stats = function( payload ) {
 		response.posts = payload.stats.posts;
 		response.views = payload.stats.views;
 		response.visitors = payload.stats.visitors;
-		response[ 'best-views' ].day = payload.stats.views_best_day;
-		response[ 'best-views' ].count = payload.stats.views_best_day_total;
+		response['best-views'].day = payload.stats.views_best_day;
+		response['best-views'].count = payload.stats.views_best_day_total;
 	}
 
 	return response;
+
 };
 
 StatsParser.prototype.statsInsights = function( payload ) {
@@ -82,9 +82,11 @@ StatsParser.prototype.statsInsights = function( payload ) {
 
 		response.day = i18n.moment().day( dayOfWeek ).format( 'dddd' );
 		response.percent = Math.round( payload.highest_day_percent );
-		response.hour = i18n.moment().hour( payload.highest_hour ).startOf( 'hour' ).format( 'LT' );
+		response.hour = i18n.moment().hour( payload.highest_hour ).startOf('hour').format( 'LT' );
 		response.hour_percent = Math.round( payload.highest_hour_percent );
+
 	}
+
 
 	return response;
 };
@@ -242,7 +244,7 @@ StatsParser.prototype.statsPublicize = function( payload ) {
 	};
 
 	if ( payload && payload.services ) {
-		response.data = payload.services.map( function( service ) {
+		response.data = payload.services.map( function ( service ) {
 			var info = serviceInfo[ service.service ];
 			return {
 				label: info.label,
@@ -285,7 +287,7 @@ StatsParser.prototype.statsReferrers = function( payload ) {
 				actions = [],
 				hasChildren = item.results && item.results.length > 0;
 
-			if ( ( item.url && -1 !== item.url.indexOf( item.name ) ) || ( ! item.url && item.name === item.group && -1 !== item.name.indexOf( '.' ) ) ) {
+			if ( ( item.url && -1 !== item.url.indexOf( item.name ) ) || ( ! item.url && item.name === item.group && -1 !== item.name.indexOf('.') ) ) {
 				actions.push( {
 					type: 'spam',
 					data: {
@@ -418,7 +420,7 @@ StatsParser.prototype.statsVideo = function( payload ) {
 		data.post = payload.post;
 	}
 
-	if ( payload && payload.pages ) {
+	if ( payload && payload.pages) {
 		data.pages = payload.pages.map( function( item ) {
 			return {
 				label: item,
@@ -623,7 +625,9 @@ StatsParser.prototype.statsComments = function( payload ) {
 };
 
 StatsParser.prototype.statsTopPosts = function( payload ) {
-	var response = { data: [] },
+	var response = {
+			data: []
+		},
 		periodRange = rangeOfPeriod( this.options.period, this.options.date ),
 		startDate = periodRange.startOf.format( 'YYYY-MM-DD' );
 
@@ -636,8 +640,10 @@ StatsParser.prototype.statsTopPosts = function( payload ) {
 			if ( item.date ) {
 				postDate = i18n.moment( item.date );
 
-				if ( ( postDate.isAfter( periodRange.startOf ) || postDate.isSame( periodRange.startOf ) ) &&
-					( postDate.isBefore( periodRange.endOf ) || postDate.isSame( periodRange.endOf ) ) ) {
+				if (
+					( postDate.isAfter( periodRange.startOf ) || postDate.isSame( periodRange.startOf ) ) &&
+					( postDate.isBefore( periodRange.endOf ) || postDate.isSame( periodRange.endOf ) )
+				) {
 					inPeriod = true;
 				}
 			}
@@ -670,38 +676,16 @@ StatsParser.prototype.statsTopPosts = function( payload ) {
 
 StatsParser.prototype.statsTags = function( payload ) {
 	var response = {
-		data: []
-	};
+			data: []
+		};
 
-	if ( payload && payload.tags ) {
-		response.data = payload.tags.map( function( item ) {
-			var children,
-				hasChildren = item.tags.length > 1,
-				labels;
+		if ( payload && payload.tags ) {
+			response.data = payload.tags.map( function( item ) {
+				var children,
+					hasChildren = item.tags.length > 1,
+					labels;
 
-			labels = item.tags.map( function( tagItem ) {
-				var iconType;
-
-				switch ( tagItem.type ) {
-					case ( 'tag' ):
-						iconType = 'tag';
-						break;
-					case ( 'category' ):
-						iconType = 'folder';
-						break;
-					default:
-						iconType = tagItem.type;
-				}
-
-				return {
-					label: tagItem.name,
-					labelIcon: iconType,
-					link: hasChildren ? null : tagItem.link
-				};
-			} );
-
-			if ( hasChildren ) {
-				children = item.tags.map( function( tagItem ) {
+				labels = item.tags.map( function( tagItem ) {
 					var iconType;
 
 					switch ( tagItem.type ) {
@@ -718,21 +702,44 @@ StatsParser.prototype.statsTags = function( payload ) {
 					return {
 						label: tagItem.name,
 						labelIcon: iconType,
-						value: null,
-						children: null,
-						link: tagItem.link
+						link: hasChildren ? null : tagItem.link
 					};
 				} );
-			}
 
-			return {
-				label: labels,
-				link: labels.length > 1 ? null : labels[ 0 ].link,
-				value: item.views,
-				children: children
-			};
-		} );
-	}
+				if ( hasChildren ) {
+					children = item.tags.map( function( tagItem ) {
+						var iconType;
+
+						switch ( tagItem.type ) {
+							case ( 'tag' ):
+								iconType = 'tag';
+								break;
+							case ( 'category' ):
+								iconType = 'folder';
+								break;
+							default:
+								iconType = tagItem.type;
+						}
+
+						return {
+							label: tagItem.name,
+							labelIcon: iconType,
+							value: null,
+							children: null,
+							link: tagItem.link
+						};
+					} );
+				}
+
+				return {
+					label: labels,
+					link: labels.length > 1 ? null : labels[ 0 ].link,
+					value: item.views,
+					children: children
+				};
+
+			} );
+		}
 
 	return response;
 };
@@ -773,15 +780,17 @@ StatsParser.prototype.statsClicks = function( payload ) {
 			}
 
 			data.push( newRecord );
+
 		}, this );
 
-		if ( payload.days[ startDate ].other_clicks ) {
+		if( payload.days[ startDate ].other_clicks ) {
 			response.viewAll = true;
 		}
 
-		if ( payload.days[ startDate ].total_clicks ) {
+		if( payload.days[ startDate ].total_clicks ) {
 			response.total = payload.days[ startDate ].total_clicks;
 		}
+
 	}
 
 	response.data = data;
@@ -795,7 +804,8 @@ StatsParser.prototype.statsCountryViews = function( payload ) {
 		periodRange = rangeOfPeriod( this.options.period, this.options.date ),
 		startDate = periodRange.startOf.format( 'YYYY-MM-DD' );
 
-	if ( payload && payload.days && payload.days[ startDate ] && payload.days[ startDate ].views ) {
+	if( payload && payload.days && payload.days[ startDate ] && payload.days[ startDate ].views ) {
+
 		data = payload.days[ startDate ].views.filter( function( viewsObject ) {
 			var country = payload[ 'country-info' ][ viewsObject.country_code ];
 			return country;
@@ -811,11 +821,11 @@ StatsParser.prototype.statsCountryViews = function( payload ) {
 			};
 		} );
 
-		if ( payload.days[ startDate ].other_views && payload.days[ startDate ].other_views > 0 ) {
+		if( payload.days[ startDate ].other_views && payload.days[ startDate ].other_views > 0 ) {
 			response.viewAll = true;
 		}
 
-		if ( payload.days[ startDate ].total_views ) {
+		if( payload.days[ startDate ].total_views ) {
 			response.total = payload.days[ startDate ].total_views;
 		}
 	}
