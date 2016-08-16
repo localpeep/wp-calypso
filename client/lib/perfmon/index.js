@@ -47,7 +47,7 @@ function observeDomChanges( MutationObserver ) {
 	} );
 
 	// this is fired for matching mutations (childList and class attr changes)
-	var observer = new MutationObserver( function( mutations, observer ) { // eslint-disable-line no-unused-vars
+	var observer = new MutationObserver( function( mutations ) {
 		// record all the nodes that match our placeholder classes in the "activePlaceholders" array
 		mutations.forEach( recordPlaceholders );
 
